@@ -32,6 +32,25 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.cart.user.username} - {self.quantity} x {self.product.name}"
 
+    def subtotal_price(self):
+        return self.product.price * self.quantity
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.cart.update_total()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.cart.update_total()
 
 
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"{self.product.name} in {self.user.username}'s wishlist"
