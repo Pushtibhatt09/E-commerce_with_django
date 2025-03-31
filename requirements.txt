@@ -1,0 +1,21 @@
+# Django and essential dependencies
+Django>=4.0,<5.0
+djangorestframework
+django-cors-headers
+Pillow  # For handling image uploads
+psycopg2-binary  # PostgreSQL adapter
+django-environ  # Environment variable management
+django-filter  # For filtering queries
+drf-yasg  # API documentation
+
+# Authentication & Security
+djangorestframework-simplejwt  # JWT authentication
+django-otp  # Optional: Two-factor authentication
+argon2-cffi  # Recommended password hasher for security
+
+# Payment Integration
+stripe  # Stripe payment gateway integration
+
+# Development & Debugging
+django-debug-toolbar  # Debugging tool for performance analysis
+flake8  # Linter for code quality
