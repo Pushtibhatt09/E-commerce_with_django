@@ -7,7 +7,6 @@ class User(AbstractUser):
     profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
     address = models.TextField(blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
-    # last_activity = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.username
