@@ -9,12 +9,12 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+# MIGRATIONS_DIR = os.path.join(BASE_DIR, "migrations")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'base',
+
     'users',
     'store',
     'orders',
@@ -47,7 +49,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
 
 ]
 
@@ -91,11 +92,14 @@ WSGI_APPLICATION = 'fashora.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'newdatabase',
+        'USER': 'postgres',
+        'PASSWORD': '12345',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -137,14 +141,26 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'users.User'
+# AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "base.User"
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 
 # Use email for authentication instead of username
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_SIGNUP_FIELDS = ["email*"]
-
-ACCOUNT_EMAIL_REQUIRED = True
+# Instead of ACCOUNT_EMAIL_REQUIRED
+ACCOUNT_LOGIN_METHODS = {"email", "username"}  # Set with {} instead of tuple
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username"]  # Must include email for verification
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ACCOUNT_SIGNUP_REDIRECT_URL = "/"
 LOGIN_REDIRECT_URL = "/"
