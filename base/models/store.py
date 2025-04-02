@@ -14,6 +14,7 @@ class Store(models.Model):
         return self.name
 
 class Category(models.Model):
+    objects = None
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,6 +63,7 @@ class ProductImage(models.Model):
 
 
 class Review(models.Model):
+    objects = None
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
