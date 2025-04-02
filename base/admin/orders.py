@@ -1,5 +1,7 @@
 from django.contrib import admin
 from base.models import Order, OrderItem
+from django.urls import reverse
+from django.utils.html import format_html
 
 
 @admin.register(Order)
@@ -17,8 +19,6 @@ class OrderItemAdmin(admin.ModelAdmin):
     search_fields = ('order__id', 'product__name')
 
     def order_link(self, obj):
-        from django.urls import reverse
-        from django.utils.html import format_html
         url = reverse('admin:base_order_change', args=[obj.order.id])
         return format_html('<a href="{}">{}</a>', url, obj.order.id)
 
