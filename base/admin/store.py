@@ -33,16 +33,15 @@ class ProductImageInline(admin.TabularInline):
     image_preview.short_description = 'Preview'
 
 
-@admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock', 'rating', 'created_at')
-    list_filter = ('category', 'rating', 'created_at')
+    list_display = ('name', 'category', 'price', 'stock', 'rating', 'trending', 'discount', 'featured', 'created_at')
+    list_filter = ('category', 'rating', 'trending', 'featured', 'created_at')
     search_fields = ('name', 'description')
-    list_editable = ('price', 'stock')
+    list_editable = ('price', 'stock', 'trending', 'discount', 'featured')
     raw_id_fields = ('category',)
     inlines = [ProductImageInline]
     date_hierarchy = 'created_at'
-    actions = ['update_ratings']
+    actions = ['update_ratings', 'mark_as_trending', 'mark_as_featured']
 
     def update_ratings(self, request, queryset):
         for product in queryset:
@@ -51,21 +50,25 @@ class ProductAdmin(admin.ModelAdmin):
 
     update_ratings.short_description = "Update selected product ratings"
 
+    def mark_as_trending(self, request, queryset):
+        queryset.update(trending=True)
+        self.message_user(request, f"Marked {queryset.count()} products as trending")
+
+    mark_as_trending.short_description = "Mark selected products as Trending"
+
+    def mark_as_featured(self, request, queryset):
+        queryset.update(featured=True)
+        self.message_user(request, f"Marked {queryset.count()} products as Featured")
+
+    mark_as_featured.short_description = "Mark selected products as Featured"
+
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    list_display = ('product', 'is_primary', 'image_preview')
+    list_display = ('product', 'is_primary')
     list_editable = ('is_primary',)
     list_filter = ('is_primary',)
     raw_id_fields = ('product',)
-    readonly_fields = ('image_preview',)
-
-    def image_preview(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" width="100" height="100" style="object-fit: cover;" />', obj.image.url)
-        return "-"
-
-    image_preview.short_description = 'Preview'
 
 
 @admin.register(Review)
@@ -83,3 +86,4 @@ class ReviewAdmin(admin.ModelAdmin):
         self.message_user(request, f"Approved {queryset.count()} reviews")
 
     approve_reviews.short_description = "Approve selected reviews"
+
