@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 from base.models import Store, Category, Product, ProductImage, Review
 
@@ -46,19 +46,19 @@ class ProductAdmin(admin.ModelAdmin):
     def update_ratings(self, request, queryset):
         for product in queryset:
             product.update_rating()
-        self.message_user(request, f"Updated ratings for {queryset.count()} products")
+        messages.success(request, f"Updated ratings for {queryset.count()} product(s).")
 
     update_ratings.short_description = "Update selected product ratings"
 
     def mark_as_trending(self, request, queryset):
-        queryset.update(trending=True)
-        self.message_user(request, f"Marked {queryset.count()} products as trending")
+        updated = queryset.update(trending=True)
+        messages.success(request, f"Marked {updated} product(s) as trending.")
 
     mark_as_trending.short_description = "Mark selected products as Trending"
 
     def mark_as_featured(self, request, queryset):
-        queryset.update(featured=True)
-        self.message_user(request, f"Marked {queryset.count()} products as Featured")
+        updated = queryset.update(featured=True)
+        messages.success(request, f"Marked {updated} product(s) as featured.")
 
     mark_as_featured.short_description = "Mark selected products as Featured"
 
@@ -82,8 +82,8 @@ class ReviewAdmin(admin.ModelAdmin):
     actions = ['approve_reviews']
 
     def approve_reviews(self, request, queryset):
-        queryset.update(is_approved=True)
-        self.message_user(request, f"Approved {queryset.count()} reviews")
+        updated = queryset.update(is_approved=True)
+        messages.success(request, f"Approved {updated} review(s).")
 
     approve_reviews.short_description = "Approve selected reviews"
 

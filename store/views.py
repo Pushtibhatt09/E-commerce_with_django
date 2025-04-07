@@ -33,7 +33,7 @@ def home(request):
         'festive_specials': festive_specials,
     }
 
-    return render(request, 'store/home.html', context)
+    return render(request, 'index.html', context)
 
 
 def product_detail(request, product_id):
@@ -45,5 +45,5 @@ def product_detail(request, product_id):
             recently_viewed.insert(0, product_id)
         request.session['recently_viewed'] = recently_viewed[:10]
 
-    return render(request, 'store/product_detail.html', {'product': product})
+    return render(request, 'product_detail.html', {'product': product})
 
