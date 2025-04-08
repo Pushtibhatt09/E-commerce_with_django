@@ -2,6 +2,7 @@ from django.shortcuts import render
 from base.models import Product, Category
 from base.models import OrderItem
 
+
 def home(request):
     trending_products = Product.objects.filter(trending=True)[:10]
     discounted_products = Product.objects.exclude(discount__isnull=True).exclude(discount=0)[:10]
@@ -14,10 +15,15 @@ def home(request):
         recently_viewed = request.session.get('recently_viewed', [])
 
     personalized_picks = []
+
     if request.user.is_authenticated:
-        user_orders = OrderItem.objects.filter(order__user=request.user).values_list('product_id', flat=True)
-        if user_orders:
-            personalized_picks = Product.objects.filter(category__products__id__in=user_orders).distinct()[:10]
+        if OrderItem.objects.filter(order__user=request.user).exists():
+            personalized_picks = Product.objects.filter(
+                category__products__in=OrderItem.objects.filter(
+                    order__user=request.user
+                ).values_list('product', flat=True)
+            ).distinct()[:10]
+
     most_buys = Product.objects.filter(orderitem__isnull=False).distinct()[:10]
     festive_specials = Product.objects.filter(category__name__icontains='festive')[:10]
 
@@ -33,7 +39,7 @@ def home(request):
         'festive_specials': festive_specials,
     }
 
-    return render(request, 'index.html', context)
+    return render(request, 'home.html', context)
 
 
 def product_detail(request, product_id):
@@ -46,4 +52,3 @@ def product_detail(request, product_id):
         request.session['recently_viewed'] = recently_viewed[:10]
 
     return render(request, 'product_detail.html', {'product': product})
-
