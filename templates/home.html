@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="body-content outer-top-vs" id="top-banner-and-menu">
+  <div class="container">
+    <div class="row"> 
+      <!-- ============================================== SIDEBAR ============================================== -->
+      {% include 'includes/sidebar.html' %}
+      <!-- ============================================== SIDEBAR : END ============================================== --> 
+      
+      <!-- ============================================== CONTENT ============================================== -->
+      <div class="col-xs-12 col-sm-12 col-md-9 homebanner-holder"> 
+        <!-- ========================================== SECTION – HERO ========================================= -->
+        
+        <div id="hero">
+          <div id="owl-main" class="owl-carousel owl-inner-nav owl-ui-sm">
+            {% for slide in slides %}
+            <div class="item" style="background-image: url({{ slide.image.url }});">
+              <div class="container-fluid">
+                <div class="caption bg-color vertical-center text-left">
+                  <div class="slider-header fadeInDown-1">{{ slide.header }}</div>
+                  <div class="big-text fadeInDown-1">{{ slide.title }}</div>
+                  <div class="excerpt fadeInDown-2 hidden-xs"> <span>{{ slide.description }}</span> </div>
+                  <div class="button-holder fadeInDown-3"> <a href="{{ slide.link }}" class="btn-lg btn btn-uppercase btn-primary shop-now-button">Shop Now</a> </div>
+                </div>
+                <!-- /.caption --> 
+              </div>
+              <!-- /.container-fluid --> 
+            </div>
+            {% endfor %}
+          </div>
+          <!-- /.owl-carousel --> 
+        </div>
+        
+        <!-- Rest of the home page content -->
+        
+      </div>
+      <!-- /.homebanner-holder --> 
+      <!-- ============================================== CONTENT : END ============================================== --> 
+    </div>
+    <!-- /.row --> 
+  </div>
+  <!-- /.container --> 
+</div>
+<!-- /#top-banner-and-menu --> 
+
+{% include 'includes/info_boxes.html' %}
+{% endblock %}
