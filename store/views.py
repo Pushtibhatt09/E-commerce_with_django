@@ -1,4 +1,6 @@
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, ListView
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 from base.models import Product, Category, OrderItem
 
 
@@ -59,3 +61,33 @@ class ProductDetailView(DetailView):
             request.session['recently_viewed'] = recently_viewed[:10]
 
         return super().get(request, *args, **kwargs)
+
+
+class CategoryView(ListView):
+    template_name = 'category.html'
+    context_object_name = 'products'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.category = None
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
+        return Product.objects.filter(category=self.category)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context
+
+
+class ContactPageView(TemplateView):
+    template_name = 'contact.html'
+
+
+class FAQPageView(TemplateView):
+    template_name = 'faq.html'
+
+
+class TermsPageView(TemplateView):
+    template_name = 'terms.html'
