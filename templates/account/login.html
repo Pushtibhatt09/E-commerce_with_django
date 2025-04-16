@@ -1,0 +1,50 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+
+{% block head_title %}
+    {% trans "Sign In - Fashora" %}
+{% endblock head_title %}
+
+{% block content %}
+    <h1>{% trans "Sign In" %}</h1>
+
+    {% if not SOCIALACCOUNT_ONLY %}
+        <p>
+            {% blocktranslate %}If you have not created an account yet, then please <a href="{{ signup_url }}">sign up</a> first.{% endblocktranslate %}
+        </p>
+
+        <form method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {{ redirect_field }}
+            <button type="submit">{% trans "Sign In" %}</button>
+        </form>
+    {% endif %}
+
+    {% if PASSKEY_LOGIN_ENABLED or LOGIN_BY_CODE_ENABLED %}
+        <hr>
+        {% if PASSKEY_LOGIN_ENABLED %}
+            <form id="mfa_login" method="post">
+                <button type="submit" id="passkey_login">{% trans "Sign in with a passkey" %}</button>
+            </form>
+        {% endif %}
+        {% if LOGIN_BY_CODE_ENABLED %}
+            <a href="{{ request_login_code_url }}">
+                <button type="button">{% trans "Send me a sign-in code" %}</button>
+            </a>
+        {% endif %}
+    {% endif %}
+
+    {% if SOCIALACCOUNT_ENABLED %}
+        <hr>
+        <h3>{% trans "Or sign in using" %}</h3>
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+{% endblock content %}
+
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+    {% endif %}
+{% endblock %}

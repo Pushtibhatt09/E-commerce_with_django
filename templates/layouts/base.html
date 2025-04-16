@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static i18n %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}Fashora{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <p>{% trans "Welcome," %} {{ user.username }}!</p>
+    {% endif %}
+
+    {% if messages %}
+        <div>
+            <strong>{% trans "Messages:" %}</strong>
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <nav>
+        <ul>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'account_email' %}">{% trans "Change Email" %}</a></li>
+                <li><a href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a></li>
+                <li><a href="{% url 'account_logout' %}">{% trans "Sign Out" %}</a></li>
+            {% else %}
+                <li><a href="{% url 'account_login' %}">{% trans "Sign In" %}</a></li>
+                <li><a href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    {% block extra_body %}{% endblock %}
+</body>
+</html>

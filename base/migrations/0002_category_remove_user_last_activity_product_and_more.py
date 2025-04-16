@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
                     "product",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="images",
+                        related_name="image",
                         to="base.product",
                     ),
                 ),

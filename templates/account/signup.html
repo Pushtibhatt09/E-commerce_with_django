@@ -1,0 +1,46 @@
+{% extends "templates/account/base_entrance.html" %}
+{% load i18n %}
+{% block head_title %}
+    {% trans "Signup - Fashora" %}
+{% endblock head_title %}
+
+{% block content %}
+    <h1>{% trans "Create Your Account" %}</h1>
+
+    <p>
+        {% blocktranslate %}Already have an account? Then please <a href="{% url 'account_login' %}">sign in</a>.{% endblocktranslate %}
+    </p>
+
+    {% if not SOCIALACCOUNT_ONLY %}
+        <form method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            {% if form.errors %}
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {{ redirect_field }}
+            <button type="submit">{% trans "Sign Up" %}</button>
+        </form>
+    {% endif %}
+
+    {% if PASSKEY_SIGNUP_ENABLED %}
+        <hr>
+        <a href="{{ signup_by_passkey_url }}">
+            <button type="button">{% trans "Sign up using a passkey" %}</button>
+        </a>
+    {% endif %}
+
+    {% if SOCIALACCOUNT_ENABLED %}
+        <hr>
+        <h3>{% trans "Or sign up using" %}</h3>
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+{% endblock content %}

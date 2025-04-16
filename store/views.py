@@ -1,70 +1,93 @@
-from django.shortcuts import render, redirect
-from base.models import Product, Category, Review
-from django.views.generic import ListView, DetailView
-from django.db.models import Q, Avg
-from base.models import Wishlist
+from django.views.generic import TemplateView, DetailView, ListView
+from django.shortcuts import get_object_or_404
+from django.http import Http404
+from base.models import Product, Category, OrderItem
 
 
-
-class HomeView(ListView):
-    model = Product
-    template_name = 'store/home.html'
-    context_object_name = 'products'
-
-    def get_queryset(self):
-        return Product.objects.order_by('-rating')[:8]
+class HomeView(TemplateView):
+    template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
+
+        trending_products = Product.objects.filter(trending=True)[:10]
+        discounted_products = Product.objects.exclude(discount__isnull=True).exclude(discount=0)[:10]
+        featured_products = Product.objects.filter(featured=True)[:10]
+        new_arrivals = Product.objects.order_by('-created_at')[:10]
+        categories = Category.objects.all()
+
+        recently_viewed = []
+        if self.request.user.is_authenticated:
+            recently_viewed = self.request.session.get('recently_viewed', [])
+
+        personalized_picks = []
+        if self.request.user.is_authenticated and OrderItem.objects.filter(order__user=self.request.user).exists():
+            personalized_picks = Product.objects.filter(
+                category__products__in=OrderItem.objects.filter(
+                    order__user=self.request.user
+                ).values_list('product', flat=True)
+            ).distinct()[:10]
+
+        most_buys = Product.objects.filter(orderitem__isnull=False).distinct()[:10]
+        festive_specials = Product.objects.filter(category__name__icontains='festive')[:10]
+
+        context.update({
+            'trending_products': trending_products,
+            'discounted_products': discounted_products,
+            'featured_products': featured_products,
+            'new_arrivals': new_arrivals,
+            'categories': categories,
+            'recently_viewed': Product.objects.filter(id__in=recently_viewed),
+            'personalized_picks': personalized_picks,
+            'most_buys': most_buys,
+            'festive_specials': festive_specials,
+        })
         return context
-
-
-class ProductListView(ListView):
-    model = Product
-    template_name = 'store/product_list.html'
-    context_object_name = 'products'
-    paginate_by = 12
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        category = self.request.GET.get('category')
-        if category:
-            queryset = queryset.filter(category_id=category)
-        search = self.request.GET.get('q')
-        if search:
-            queryset = queryset.filter(Q(name__icontains=search) | Q(description__icontains=search))
-        return queryset
 
 
 class ProductDetailView(DetailView):
     model = Product
-    template_name = 'store/product_detail.html'
+    template_name = 'product_detail.html'
     context_object_name = 'product'
+    pk_url_kwarg = 'product_id'
+
+    def get(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        if request.user.is_authenticated:
+            recently_viewed = request.session.get('recently_viewed', [])
+            if product.id not in recently_viewed:
+                recently_viewed.insert(0, product.id)
+            request.session['recently_viewed'] = recently_viewed[:10]
+
+        return super().get(request, *args, **kwargs)
+
+
+class CategoryView(ListView):
+    template_name = 'category.html'
+    context_object_name = 'products'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.category = None
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
+        return Product.objects.filter(category=self.category)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        context.update({
-            'reviews': product.reviews.filter(is_approved=True),
-            'avg_rating': product.reviews.aggregate(Avg('rating'))['rating__avg'] or 0,
-            'in_wishlist': self.request.user.is_authenticated and Wishlist.objects.filter(user=self.request.user,
-                                                                                          product=product).exists(),
-            'review_submitted': self.request.GET.get('review_submitted', False)
-        })
+        context['category'] = self.category
         return context
 
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('login')
 
-        product = self.get_object()
-        Review.objects.update_or_create(
-            user=request.user, product=product,
-            defaults={
-                'rating': request.POST.get('rating', 0),
-                'comment': request.POST.get('comment', '').strip(),
-                'is_approved': False
-            }
-        )
-        return redirect(f'product_detail/{product.pk}?review_submitted=True')
+class ContactPageView(TemplateView):
+    template_name = 'contact.html'
+
+
+class FAQPageView(TemplateView):
+    template_name = 'faq.html'
+
+
+class TermsPageView(TemplateView):
+    template_name = 'terms.html'

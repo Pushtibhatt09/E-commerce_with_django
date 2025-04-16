@@ -70,7 +70,7 @@ ROOT_URLCONF = 'fashora.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,6 +135,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# STATIC_ROOT = os.path.join(BASE_DIR)
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -157,6 +159,12 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"email", "username"}  # Set with {} instead of tuple
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username"]  # Must include email for verification
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_FORMS = {
+    'signup': 'users.forms.CustomSignupForm',
+    'login': 'users.forms.CustomLoginForm',
+    'reset_password': 'users.forms.CustomResetPasswordForm',
+    'change_password': 'users.forms.CustomChangePasswordForm',
+}
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
